@@ -11,11 +11,13 @@ function Invoke-FindPublicGroup {
     )
 
 function Example{
-        Write-Host "Hey F*ckers :)    " -ForegroundColor DarkYellow
-        Write-Host "Usage:" -ForegroundColor DarkYellow
         Write-Host "" 
-        Write-Host "    Invoke-FindPublicGroup -RefreshToken 1.AQQAGUvwznZ3lEq4mzdcd6j5 " -ForegroundColor DarkYellow
-        Write-Host "    Invoke-FindPublicGroup -ClientID xxxxxxxx-xxxx-xxxx-xxxxxxxx -SecretID ec8Q~ONLx***** " -ForegroundColor DarkYellow
+        Write-Host "Hey F*ckers :)    " -ForegroundColor DarkCyan
+        Write-Host "Usage:" -ForegroundColor DarkCyan
+        Write-Host "" 
+        Write-Host "    Invoke-FindPublicGroup -RefreshToken <Refresh_Token> " -ForegroundColor DarkCyan
+        Write-Host "    Invoke-FindPublicGroup -ClientID <Application_ClientID> -SecretID <Application_SecretID> " -ForegroundColor DarkCyan
+        Write-Host "" 
 
 }
 
@@ -31,6 +33,7 @@ function Example{
         Write-Host "Needs ClientId" -DarkBlue 
     }
 
+    
     function Get-Token-WithRefreshToken {
         param ([string]$RefreshToken)
         $url = "https://login.microsoftonline.com/cef04b19-7776-4a94-b89b-375c77a8f936/oauth2/v2.0/token"
@@ -89,17 +92,30 @@ function Example{
         Write-Host "[-] Failed to acquire initial Access Token." -ForegroundColor Red
         return
     }
+    
+    if (Test-Path "public_groups.txt") {
+        $choice = Read-Host "File 'public_groups.txt' already exists. Do you want to (D)elete it or (A)ppend to it? [D/A]" 
+        if ($choice -eq "D" -or $choice -eq "d") {
+            Remove-Item -Path "public_groups.txt" -Force
+            Write-Host "[*] Deleted existing 'public_groups.txt'. Starting fresh." -ForegroundColor DarkYellow
+        } elseif ($choice -eq "A" -or $choice -eq "a") {
+            Write-Host "[*] Appending to existing 'public_groups.txt'..." -ForegroundColor DarkYellow
+        } else {
+            Write-Host "[-] Invalid choice. Exiting." -ForegroundColor Red
+            return
+        }
+    }
 
     # Headers
     $headers = @{
         "Authorization"    = "Bearer $GraphAccessToken"
         "Content-Type"     = "application/json"
         "ConsistencyLevel" = "eventual"
-        "Prefer"           = "odata.maxpagesize=999"
+        "Prefer"           = "odata.maxpagesize=999" #Importentttttttt!!!
     }
 
     $startTime = Get-Date
-    $refreshIntervalMinutes = 7
+    $refreshIntervalMinutes = 7 #every 7 min the script will request new access token :)!!!!
     $allowedGroupIds = @()
     $groupApiUrl = "https://graph.microsoft.com/v1.0/groups?$filter=groupTypes/any(c:c eq 'Unified')&$top=999"
     $estimateUrl = "https://graph.microsoft.com/beta/roleManagement/directory/estimateAccess"
@@ -108,7 +124,7 @@ function Example{
         try {
             $response = Invoke-RestMethod -Uri $groupApiUrl -Headers $headers -Method Get
         } catch {
-            Write-Host "[-] Failed to fetch groups: $_" -ForegroundColor Red
+            Write-Host "[-] Failed to fetch groups: $_" -ForegroundColor DarkRed
             break
         }
 
@@ -144,8 +160,10 @@ function Example{
                 try {
                     $responseEstimate = Invoke-RestMethod -Uri $estimateUrl -Headers $headers -Method Post -Body $body
                     if ($responseEstimate.value.accessDecision -eq "Allowed") {
-                        Write-Host "[+] $groupDisplayName ($groupId) is Public." -ForegroundColor DarkGreen
-                        $allowedGroupIds += "$groupDisplayName : $groupId"
+                        Write-Host "[+] $groupDisplayName ($groupId) is Public." -ForegroundColor Green
+                        $line = $groupDisplayName.PadRight(30) + ":         " + $groupId #changed
+                        $allowedGroupIds += $line #added
+                        Add-Content -Path "public_groups.txt" -Value $line #added
                     } else {
                         Write-Host "[-] $groupDisplayName ($groupId) is not Public." -ForegroundColor DarkGray
                     }
@@ -177,14 +195,14 @@ function Example{
                 }
             } while (-not $success)
 
-            Start-Sleep -Milliseconds 400
+            Start-Sleep -Milliseconds 50
         }
 
         $groupApiUrl = $response.'@odata.nextLink'
     } while ($groupApiUrl)
 
-    $allowedGroupIds | Out-File -FilePath "public_groups.txt" -Encoding ascii
-    Write-Host "`n[*] Saved $($allowedGroupIds.Count) updatable group IDs to updatable_groups.txt" -ForegroundColor DarkCyan
+    #$allowedGroupIds | Out-File -FilePath "public_groups.txt" -Encoding ascii
+    Write-Host "`n[*] Saved $($allowedGroupIds.Count) Public group IDs to public_groups.txt" -ForegroundColor DarkCyan
 
     return $allowedGroupIds
 }
