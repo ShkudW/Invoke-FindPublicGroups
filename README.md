@@ -8,7 +8,7 @@ When a group is public:
  - Public groups are often used for open collaboration (e.g., Teams, Outlook, Planner).
 Note: Traditional Security Groups (securityEnabled = true) do not support the Public visibility model — only Microsoft 365 Groups do.
 
-![image](https://github.com/user-attachments/assets/56691b08-9792-4b0f-9723-2258801570df)
+![image](https://github.com/user-attachments/assets/7ca97448-5591-4020-be32-44f6a764dadc)
 
 
 From a Red Team perspective, Public Groups offer critical opportunities:
