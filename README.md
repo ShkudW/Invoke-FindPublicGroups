@@ -1,10 +1,14 @@
 # Invoke-FindPublicGroups
 
+For Any question - shaked.wiessman@ab-inbev.com
+
 In Microsoft Entra ID (formerly Azure Active Directory), a Public Group typically refers to a Microsoft 365 Group (GroupTypes=Unified) where the Visibility attribute is set to Public.
 When a group is public:
  - Any user within the tenant can view the group's membership and freely join the group without requiring approval.
  - Public groups are often used for open collaboration (e.g., Teams, Outlook, Planner).
 Note: Traditional Security Groups (securityEnabled = true) do not support the Public visibility model — only Microsoft 365 Groups do.
+
+![image](https://github.com/user-attachments/assets/56691b08-9792-4b0f-9723-2258801570df)
 
 
 From a Red Team perspective, Public Groups offer critical opportunities:
@@ -33,6 +37,11 @@ The tool authenticates to Microsoft Graph using a Refresh Token or Client Creden
 ---
 ## Usage Example
 
+supporting Device Code Flow:
+```powershell
+Invoke-FindUpdatableGroups -DeviceCodeFlow
+```
+if you have Refresh Token:
 ```powershell
 Invoke-FindUpdatableGroups -RefreshToken <your_refresh_token>
 ```
