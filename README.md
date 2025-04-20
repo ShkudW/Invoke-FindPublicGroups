@@ -1,6 +1,5 @@
 # Invoke-FindPublicGroups
 
-For Any question - shaked.wiessman@ab-inbev.com
 
 In Microsoft Entra ID (formerly Azure Active Directory), a Public Group typically refers to a Microsoft 365 Group (GroupTypes=Unified) where the Visibility attribute is set to Public.
 When a group is public:
